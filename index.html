@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTML form to Google Sheet</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <h1 id="msg"></h1>
+    <h1>Gugguhüsli Aufenthalt abrechnen</h1>
+    <form>
+      <label for="name">Name:</label><br />
+      <select name="name">
+        <option value="Isabelle">Isabelle</option>
+        <option value="Erich+Rachel">Erich+Rachel</option>
+        <option value="Erich">Erich</option>
+        <option value="Dominik">Dominik</option>
+        <option value="Nando">Nando</option>
+        <option value="Sven">Sven</option>
+        <option value="Nina">Nina</option></select
+      ><br /><br />
+      <label for="startdatum">Datum Ankunft:</label><br />
+      <input
+        type="date"
+        name="startdatum"
+        id="startdatum"
+        placeholder="Ankunft Datum"
+        onchange="calculateDays()"
+      /><br /><br />
+      <label for="enddatum">Datum Abreise:</label><br />
+      <input
+        type="date"
+        name="enddatum"
+        id="enddatum"
+        placeholder="Abfahrt Datum"
+        onchange="calculateDays()"
+      /><br />
+      <p id="result"></p>
+      <label for="personen">Anzahl Personen:</label><br />
+      <input
+        type="text"
+        name="personen"
+        id="personen"
+        placeholder="Anzahl Personen"
+        onchange="calculatePrice()"
+      /><br />
+      <p id="preis"></p>
+      <label for="kommentar">Willst du etwas über deinen Aufenthalt mitteilen?</label
+      ><br />
+      <input type="text" name="kommentar" placeholder="Kommentar" />
+      <input type="submit" id="sub" value="Aufenthalt abrechnen" />
+    </form>
+    <script>
+      let differenceInDays = 0; // Globale Variable für die Aufenthaltsdauer
+
+      function calculateDays() {
+        let startDate = new Date(document.getElementById("startdatum").value);
+        let endDate = new Date(document.getElementById("enddatum").value);
+        let differenceInTime = endDate.getTime() - startDate.getTime();
+        differenceInDays = differenceInTime / (1000 * 3600 * 24);
+        document.getElementById("result").innerText =
+          "Aufenthaltsdauer: " + differenceInDays + " Tage";
+        calculatePrice(); // Aufruf der Funktion zum Aktualisieren des Preises
+      }
+
+      function calculatePrice() {
+        let anzahlPersonen = parseInt(
+          document.getElementById("personen").value,
+        );
+        let preisTotal = anzahlPersonen * differenceInDays * 10; // Annahme eines Preises von 10 Fr. pro Person pro Tag
+        document.getElementById("preis").innerText =
+          "Der Aufenthalt kostet: " +
+          preisTotal +
+          " Fr." +
+          " (pro Person " +
+          preisTotal / anzahlPersonen +
+          "Fr.)";
+      }
+
+      let form = document.querySelector("form");
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        document.querySelector("#sub").value = "Aufenthalt wird abgerechnet..";
+        let data = new FormData(form);
+        fetch(
+          "https://script.google.com/macros/s/AKfycby95dnQx9-xmMhG-H6caVuGwuPtnCBNZadHwwrcUHiew-fUKfTXqurAx71470m9v_1gXA/exec",
+          {
+            method: "POST",
+            body: data,
+          },
+        )
+          .then((res) => res.text())
+          .then((data) => {
+            document.querySelector("#msg").innerHTML =
+              "Vielen Dank! Ihr Aufenthalt wurde erfolgreich abgerechnet.";
+            document.querySelector("#sub").value = "Weiterer Aufenthalt abrechnen";
+          });
+      });
+    </script>
+  </body>
+</html>
