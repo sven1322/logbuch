@@ -47,7 +47,8 @@
         onchange="calculatePrice()"
       /><br />
       <p id="preis"></p>
-      <label for="kommentar">Willst du etwas über deinen Aufenthalt mitteilen?</label
+      <label for="kommentar"
+        >Willst du etwas über deinen Aufenthalt mitteilen?</label
       ><br />
       <input type="text" name="kommentar" placeholder="Kommentar" />
       <input type="submit" id="sub" value="Aufenthalt abrechnen" />
@@ -69,7 +70,7 @@
         let anzahlPersonen = parseInt(
           document.getElementById("personen").value,
         );
-        let preisTotal = anzahlPersonen * differenceInDays * 15; // Annahme eines Preises von 15 Fr. pro Person pro Tag
+        let preisTotal = anzahlPersonen * differenceInDays * 15; // Annahme eines Preises von 10 Fr. pro Person pro Tag
         document.getElementById("preis").innerText =
           "Der Aufenthalt kostet: " +
           preisTotal +
@@ -82,21 +83,30 @@
       let form = document.querySelector("form");
       form.addEventListener("submit", (e) => {
         e.preventDefault();
-        document.querySelector("#sub").value = "Aufenthalt wird abgerechnet..";
-        let data = new FormData(form);
-        fetch(
-          "https://script.google.com/macros/s/AKfycbzkWbMFOaf0Ne2lPLf3ENUszHzYrOd4BbTNy4iTQdOsnPLpF_mOCdlLR5Y2DZlRYKXpmA/exec",
-          {
-            method: "POST",
-            body: data,
-          },
-        )
-          .then((res) => res.text())
-          .then((data) => {
-            document.querySelector("#msg").innerHTML =
-              "Vielen Dank! Ihr Aufenthalt wurde erfolgreich abgerechnet.";
-            document.querySelector("#sub").value = "Weiterer Aufenthalt abrechnen";
-          });
+        if (
+          confirm("Bist du sicher, dass Du den Aufenthalt abrechnen möchtest?")
+        ) {
+          document.querySelector("#sub").value =
+            "Aufenthalt wird abgerechnet..";
+          let data = new FormData(form);
+          fetch(
+            "https://script.google.com/macros/s/AKfycby95dnQx9-xmMhG-H6caVuGwuPtnCBNZadHwwrcUHiew-fUKfTXqurAx71470m9v_1gXA/exec",
+            {
+              method: "POST",
+              body: data,
+            },
+          )
+            .then((res) => res.text())
+            .then((data) => {
+              document.querySelector("#msg").innerHTML =
+                "Vielen Dank! Ihr Aufenthalt wurde erfolgreich abgerechnet.";
+              document.querySelector("#sub").value =
+                "Weiterer Aufenthalt abrechnen";
+              form.reset(); // Alle Felder zurücksetzen
+              window.scrollTo(0, 0);
+              calculateDays();
+            });
+        }
       });
     </script>
   </body>
